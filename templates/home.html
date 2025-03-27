@@ -3,67 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CO₂ Emission Predictor</title>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById("prediction-form").addEventListener("submit", function(event) {
-                event.preventDefault();
-                
-                let formData = new FormData(this);
-                let jsonData = new URLSearchParams(formData);
-
-                fetch("/predict", {
-                    method: "POST",
-                    body: jsonData,
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        document.getElementById("result").innerHTML = "Error: " + data.error;
-                    } else {
-                        document.getElementById("result").innerHTML = 
-                            "Predicted CO₂ Emission: " + data.predicted_CO2_emission + " g/km";
-                    }
-                })
-                .catch(error => console.error("Error:", error));
-            });
-        });
-    </script>
+    <title>CO₂ Emissions Prediction</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://source.unsplash.com/1600x900/?environment,car') no-repeat center center/cover;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 100px auto;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 10px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        input, select {
+            width: 90%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: none;
+            font-size: 1em;
+        }
+        button {
+            width: 95%;
+            padding: 12px;
+            font-size: 1.2em;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #218838;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #FFD700;
+        }
+    </style>
 </head>
 <body>
-    <h1>CO₂ Emission Predictor</h1>
-    <form id="prediction-form">
-        <label>Engine Size (L): <input type="number" name="engine_size" step="0.1" required></label><br>
-        <label>Cylinders: <input type="number" name="cylinders" required></label><br>
-        <label>Fuel Consumption City (L/100km): <input type="number" name="fuel_city" step="0.1" required></label><br>
-        <label>Fuel Consumption Highway (L/100km): <input type="number" name="fuel_hwy" step="0.1" required></label><br>
-        <label>Fuel Consumption Combined (L/100km): <input type="number" name="fuel_comb" step="0.1" required></label><br>
-        <label>Transmission:
-            <select name="transmission">
-                <option value="Automatic">Automatic</option>
-                <option value="Manual">Manual</option>
-                <option value="CVT">CVT</option>
-            </select>
-        </label><br>
-        <label>Fuel Type:
-            <select name="fuel_type">
-                <option value="Gasoline">Gasoline</option>
-                <option value="Diesel">Diesel</option>
-                <option value="Electric">Electric</option>
-            </select>
-        </label><br>
-        <label>Vehicle Class:
-            <select name="vehicle_class">
-                <option value="Sedan">Sedan</option>
-                <option value="SUV">SUV</option>
-                <option value="Truck">Truck</option>
-            </select>
-        </label><br>
-        <button type="submit">Predict CO₂</button>
-    </form>
-    <h2 id="result"></h2>
+    <div class="container">
+        <h1>CO₂ Emission Predictor</h1>
+        <p>Enter your vehicle details to predict CO₂ emissions instantly!</p>
+        <form id="prediction-form">
+            <div class="input-group">
+                <input type="text" name="engine_size" placeholder="Engine Size (L)" required>
+                <input type="text" name="cylinders" placeholder="Cylinders" required>
+                <input type="text" name="fuel_city" placeholder="Fuel Consumption City (L/100km)" required>
+                <input type="text" name="fuel_hwy" placeholder="Fuel Consumption Hwy (L/100km)" required>
+                <input type="text" name="fuel_comb" placeholder="Fuel Consumption Combined (L/100km)" required>
+                <select name="transmission" required>
+                    <option value="" disabled selected>Select Transmission</option>
+                    <option value="Automatic">Automatic</option>
+                    <option value="Manual">Manual</option>
+                    <option value="CVT">CVT</option>
+                </select>
+                <select name="fuel_type" required>
+                    <option value="" disabled selected>Select Fuel Type</option>
+                    <option value="Gasoline">Gasoline</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Electric">Electric</option>
+                    <option value="Hybrid">Hybrid</option>
+                </select>
+                <select name="vehicle_class" required>
+                    <option value="" disabled selected>Select Vehicle Class</option>
+                    <option value="Compact">Compact</option>
+                    <option value="SUV">SUV</option>
+                    <option value="Sedan">Sedan</option>
+                    <option value="Truck">Truck</option>
+                    <option value="Luxury">Luxury</option>
+                </select>
+            </div>
+            <button type="submit">Predict CO₂ Emission</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById("prediction-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            let formData = new FormData(this);
+            fetch("/predict", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("result").innerHTML = "<p style='color: red;'>Error: " + data.error + "</p>";
+                } else {
+                    document.getElementById("result").innerHTML = 
+                        "<p>Predicted CO₂ Emission: <strong>" + data.predicted_CO2_emission + " g/km</strong></p>";
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
 </body>
 </html>
