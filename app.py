@@ -1,17 +1,13 @@
 from flask import Flask, render_template, request, jsonify
 import pickle
-import os
+import numpy as np
 
 app = Flask(__name__)
 
-# Load model and preprocessing files
-model_path = os.path.join(os.path.dirname(__file__), "best_model.pkl")
-encoder_path = os.path.join(os.path.dirname(__file__), "encoder.pkl")
-scaler_path = os.path.join(os.path.dirname(__file__), "scaler.pkl")
-
-model = pickle.load(open(model_path, "rb"))
-encoder = pickle.load(open(encoder_path, "rb"))
-scaler = pickle.load(open(scaler_path, "rb"))
+# Load the trained model and preprocessing tools
+model = pickle.load(open("best_model.pkl", "rb"))
+encoder = pickle.load(open("encoder.pkl", "rb"))
+scaler = pickle.load(open("scaler.pkl", "rb"))
 
 @app.route('/')
 def home():
@@ -20,7 +16,7 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Extract input data from form
+        # Extract data from form
         engine_size = float(request.form['engine_size'])
         cylinders = int(request.form['cylinders'])
         fuel_city = float(request.form['fuel_city'])
@@ -30,20 +26,18 @@ def predict():
         fuel_type = request.form['fuel_type']
         vehicle_class = request.form['vehicle_class']
 
-        # Encode categorical variables
-        encoded_transmission = encoder.transform([[transmission]])[0, 0]
-        encoded_fuel_type = encoder.transform([[fuel_type]])[0, 0]
-        encoded_vehicle_class = encoder.transform([[vehicle_class]])[0, 0]
+        # Encode categorical values
+        transmission_encoded = encoder.transform([[transmission]])[0][0]
+        fuel_type_encoded = encoder.transform([[fuel_type]])[0][0]
+        vehicle_class_encoded = encoder.transform([[vehicle_class]])[0][0]
 
-        # Prepare input features
-        input_data = [[engine_size, cylinders, fuel_city, fuel_hwy, fuel_comb,
-                       encoded_transmission, encoded_fuel_type, encoded_vehicle_class]]
+        # Prepare input for model
+        features = np.array([[engine_size, cylinders, fuel_city, fuel_hwy, fuel_comb, 
+                              transmission_encoded, fuel_type_encoded, vehicle_class_encoded]])
+        features_scaled = scaler.transform(features)
 
-        # Scale the input
-        input_data = scaler.transform(input_data)
-
-        # Predict CO₂ emissions
-        predicted_co2 = model.predict(input_data)[0]
+        # Make prediction
+        predicted_co2 = model.predict(features_scaled)[0]
 
         return jsonify({
             "engine_size": engine_size,
@@ -61,5 +55,4 @@ def predict():
         return jsonify({"error": str(e)}), 400
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)
