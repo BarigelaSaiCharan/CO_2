@@ -1,13 +1,12 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[ ]:
+
+
 from flask import Flask, render_template, request, jsonify
-import pickle
-import numpy as np
 
 app = Flask(__name__)
-
-# Load the trained model and preprocessing tools
-model = pickle.load(open("best_model.pkl", "rb"))
-encoder = pickle.load(open("encoder.pkl", "rb"))
-scaler = pickle.load(open("scaler.pkl", "rb"))
 
 @app.route('/')
 def home():
@@ -16,7 +15,7 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Extract data from form
+        # Get form data
         engine_size = float(request.form['engine_size'])
         cylinders = int(request.form['cylinders'])
         fuel_city = float(request.form['fuel_city'])
@@ -26,18 +25,8 @@ def predict():
         fuel_type = request.form['fuel_type']
         vehicle_class = request.form['vehicle_class']
 
-        # Encode categorical values
-        transmission_encoded = encoder.transform([[transmission]])[0][0]
-        fuel_type_encoded = encoder.transform([[fuel_type]])[0][0]
-        vehicle_class_encoded = encoder.transform([[vehicle_class]])[0][0]
-
-        # Prepare input for model
-        features = np.array([[engine_size, cylinders, fuel_city, fuel_hwy, fuel_comb, 
-                              transmission_encoded, fuel_type_encoded, vehicle_class_encoded]])
-        features_scaled = scaler.transform(features)
-
-        # Make prediction
-        predicted_co2 = model.predict(features_scaled)[0]
+        # Dummy prediction logic (Replace with actual model prediction)
+        predicted_co2 = (engine_size * 20) + (cylinders * 5) + (fuel_comb * 10)
 
         return jsonify({
             "engine_size": engine_size,
