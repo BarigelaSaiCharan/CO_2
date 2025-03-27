@@ -4,58 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CO2 Emission Predictor</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h2>CO2 Emission Prediction</h2>
-    <form id="predictForm">
-        <label for="engine_size">Engine Size (L):</label>
-        <input type="number" step="0.1" id="engine_size" name="engine_size" required><br><br>
+    <h1>CO2 Emission Predictor</h1>
+    <form action="/predict" method="post">
+        <label>Engine Size:</label>
+        <input type="number" step="0.1" name="engine_size" required><br>
 
-        <label for="cylinders">Cylinders:</label>
-        <input type="number" id="cylinders" name="cylinders" required><br><br>
+        <label>Cylinders:</label>
+        <input type="number" name="cylinders" required><br>
 
-        <label for="fuel_city">Fuel City (L/100 km):</label>
-        <input type="number" step="0.1" id="fuel_city" name="fuel_city" required><br><br>
+        <label>Fuel City (L/100km):</label>
+        <input type="number" step="0.1" name="fuel_city" required><br>
 
-        <label for="fuel_hwy">Fuel Highway (L/100 km):</label>
-        <input type="number" step="0.1" id="fuel_hwy" name="fuel_hwy" required><br><br>
+        <label>Fuel Highway (L/100km):</label>
+        <input type="number" step="0.1" name="fuel_hwy" required><br>
 
-        <label for="fuel_comb">Fuel Combined (L/100 km):</label>
-        <input type="number" step="0.1" id="fuel_comb" name="fuel_comb" required><br><br>
+        <label>Fuel Combined (L/100km):</label>
+        <input type="number" step="0.1" name="fuel_comb" required><br>
 
-        <label for="transmission">Transmission:</label>
-        <input type="text" id="transmission" name="transmission" required><br><br>
+        <label>Transmission:</label>
+        <input type="text" name="transmission" required><br>
 
-        <label for="fuel_type">Fuel Type:</label>
-        <input type="text" id="fuel_type" name="fuel_type" required><br><br>
+        <label>Fuel Type:</label>
+        <input type="text" name="fuel_type" required><br>
 
-        <label for="vehicle_class">Vehicle Class:</label>
-        <input type="text" id="vehicle_class" name="vehicle_class" required><br><br>
+        <label>Vehicle Class:</label>
+        <input type="text" name="vehicle_class" required><br>
 
         <button type="submit">Predict CO2 Emission</button>
     </form>
-
-    <h3>Prediction Result:</h3>
-    <p id="result"></p>
-
-    <script>
-        $(document).ready(function() {
-            $("#predictForm").on("submit", function(event) {
-                event.preventDefault();
-                var formData = $(this).serialize();
-
-                $.post("/predict", formData, function(data) {
-                    if (data.error) {
-                        $("#result").html("<b>Error:</b> " + data.error);
-                    } else {
-                        $("#result").html("<b>Predicted CO2 Emission:</b> " + data.predicted_CO2_emission + " g/km");
-                    }
-                }).fail(function() {
-                    $("#result").html("<b>Error:</b> Unable to get prediction.");
-                });
-            });
-        });
-    </script>
 </body>
 </html>
