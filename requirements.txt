@@ -1,7 +1,6 @@
 flask
-flask-cors
-scikit-learn
-pandas
-numpy
-joblib
 gunicorn
+numpy
+pandas
+scikit-learn
+pickle-mixin
