@@ -3,57 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CO₂ Emission Predictor</title>
+    <title>CO2 Emission Predictor</title>
+    <script>
+        async function predictCO2(event) {
+            event.preventDefault();
+            
+            let formData = {
+                engine_size: document.getElementById("engine_size").value,
+                cylinders: document.getElementById("cylinders").value,
+                fuel_city: document.getElementById("fuel_city").value,
+                fuel_hwy: document.getElementById("fuel_hwy").value,
+                fuel_comb: document.getElementById("fuel_comb").value,
+                transmission: document.getElementById("transmission").value,
+                fuel_type: document.getElementById("fuel_type").value,
+                vehicle_class: document.getElementById("vehicle_class").value
+            };
+
+            let response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            
+            let result = await response.json();
+            document.getElementById("result").innerText = response.ok ? `Predicted CO2 Emission: ${result.predicted_CO2_emission} g/km` : `Error: ${result.error}`;
+        }
+    </script>
 </head>
 <body>
-    <div class="container">
-        <h1>CO₂ Emission Predictor</h1>
-        <form id="predict-form">
-            <div class="input-group">
-                <input type="number" id="engine_size" placeholder="Engine Size (L)" required>
-                <input type="number" id="cylinders" placeholder="Cylinders" required>
-                <input type="number" id="fuel_city" placeholder="Fuel Consumption City (L/100km)" required>
-                <input type="number" id="fuel_hwy" placeholder="Fuel Consumption Hwy (L/100km)" required>
-                <input type="number" id="fuel_comb" placeholder="Fuel Consumption Combined (L/100km)" required>
-                <select id="transmission" required>
-                    <option value="" disabled selected>Select Transmission</option>
-                    <option value="Automatic">Automatic</option>
-                    <option value="Manual">Manual</option>
-                    <option value="CVT">CVT</option>
-                </select>
-                <select id="fuel_type" required>
-                    <option value="" disabled selected>Select Fuel Type</option>
-                    <option value="Gasoline">Gasoline</option>
-                    <option value="Diesel">Diesel</option>
-                    <option value="Electric">Electric</option>
-                    <option value="Hybrid">Hybrid</option>
-                </select>
-            </div>
-            <button type="submit">Predict CO₂ Emission</button>
-        </form>
-        <div class="result" id="result-box">Predicted CO₂ Emission: <span id="prediction"></span> g/km</div>
-    </div>
-    <script>
-        document.getElementById("predict-form").addEventListener("submit", async function(event) {
-            event.preventDefault();
-            let data = {
-                engine_size: parseFloat(document.getElementById("engine_size").value),
-                cylinders: parseInt(document.getElementById("cylinders").value),
-                fuel_city: parseFloat(document.getElementById("fuel_city").value),
-                fuel_hwy: parseFloat(document.getElementById("fuel_hwy").value),
-                fuel_comb: parseFloat(document.getElementById("fuel_comb").value),
-                transmission: document.getElementById("transmission").value,
-                fuel_type: document.getElementById("fuel_type").value
-            };
-            let response = await fetch("/predict", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            });
-            let result = await response.json();
-            document.getElementById("prediction").innerText = result.emission ? result.emission.toFixed(2) : "Error";
-            document.getElementById("result-box").style.display = "block";
-        });
-    </script>
+    <h2>CO2 Emission Predictor</h2>
+    <form onsubmit="predictCO2(event)">
+        <label>Engine Size:</label>
+        <input type="number" step="0.1" id="engine_size" required><br>
+        <label>Cylinders:</label>
+        <input type="number" id="cylinders" required><br>
+        <label>Fuel Consumption (City):</label>
+        <input type="number" step="0.1" id="fuel_city" required><br>
+        <label>Fuel Consumption (Highway):</label>
+        <input type="number" step="0.1" id="fuel_hwy" required><br>
+        <label>Fuel Consumption (Combined):</label>
+        <input type="number" step="0.1" id="fuel_comb" required><br>
+        <label>Transmission:</label>
+        <input type="text" id="transmission" required><br>
+        <label>Fuel Type:</label>
+        <input type="text" id="fuel_type" required><br>
+        <label>Vehicle Class:</label>
+        <input type="text" id="vehicle_class" required><br>
+        <button type="submit">Predict</button>
+    </form>
+    <h3 id="result"></h3>
 </body>
 </html>
